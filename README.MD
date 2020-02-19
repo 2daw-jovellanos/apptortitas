@@ -109,13 +109,14 @@ var dbo;
 client.connect()
     .then(
         () => {
-            dbo = client.db("libros");
-            console.log("Conectado a libros");
+            dbo = client.db("apilibros");
+            console.log("Conectado a la bd apilibros");
         }
     )
     .catch(
-        () => {
-            console.log("errrorrrr al conectar");
+        (err) => {
+            console.log("errrorrrr en mongo al conectar");
+            console.log(err);
         }
     )
 ```

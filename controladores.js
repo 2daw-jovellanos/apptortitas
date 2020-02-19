@@ -1,14 +1,41 @@
 /* Controladores. No estamos comprobando errores */
 
-/** Esto hace de almacén de datos mientras no tengamos una BD 
- *  Se borra cada vez que se reinicia el servidor */
-var libros = [];
+const MongoClient = require("mongodb").MongoClient;
+const ObjectId = require("mongodb").ObjectId;
+
+// Crear el cliente del Mongo
+var client = new MongoClient("mongodb://localhost:27017", { useUnifiedTopology: true });
+// una variable para el manejador de la BD
+var dbo;
+// intento conectar
+client.connect() // devuelve una promesa
+    .then(       // que relleno con una función si la promesa se satisface
+        () => {
+            dbo = client.db("apilibros");
+            console.log("Conectado a la bd apilibros");
+        }
+    )
+    .catch(      // y otra si no se ha podido satisfacer
+        (err) => {
+            console.log("errrorrrr en mongo al conectar");
+            console.log(err);
+        }
+    )
+
 
 /** Controlador para obtener un libro */
 exports.obtenerLibro = function (req, res) {
     let id = req.params.id;
+    dbo.collection("libro").findOne({ _id: ObjectId(req.params.id) })
+        .then((dbres) => { 
+            res.json(dbres);
+        })
+        .catch((err) => { 
+            res.status(400).end();
+        })
+
     let libro = libros[id];
-    res.json({id,...libro}); 
+    res.json({id, ...libro}); 
 }
 
 /** Controlador para obtener todos los id de libros 
