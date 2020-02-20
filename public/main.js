@@ -68,10 +68,5 @@ var vue = new Vue({
             .then((res) => { this.idsLibros = res });
 
     },
-    methods: {
-        avisame() {
-            console.log("avisado");
-        }
-    }
 });
 
