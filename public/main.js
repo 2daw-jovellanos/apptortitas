@@ -67,6 +67,11 @@ var vue = new Vue({
             .then((res) => { return res.json(); })
             .then((res) => { this.idsLibros = res });
 
+    },
+    methods: {
+        avisame() {
+            console.log("avisado");
+        }
     }
 });
 
