@@ -8,7 +8,7 @@ var server = express();  // Crear el objeto express
 // ************* Cargar middlewares
 server.use(bodyParser.json()); // para parsear JSON en el body del request
 // server.use(bodyParser.urlencoded({extended:true})); // para parsear parametros URLencoded (como si vinieran de un <form>).
-// server.use(express.static('public')); // para servir posible contenido estático.
+server.use(express.static('public')); // para servir posible contenido estático.
 
 
 // ************* indicar rutas a express

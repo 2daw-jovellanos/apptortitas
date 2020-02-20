@@ -27,51 +27,46 @@ client.connect() // devuelve una promesa
 exports.obtenerLibro = function (req, res) {
     let id = req.params.id;
     dbo.collection("libro").findOne({ _id: ObjectId(req.params.id) })
-        .then((dbres) => { 
-            res.json(dbres);
-        })
-        .catch((err) => { 
-            res.status(400).end();
-        })
-
-    let libro = libros[id];
-    res.json({id, ...libro}); 
+        .then((dbres) => { res.json(dbres); })
+        .catch((err) => { res.status(400).end(); })
 }
 
 /** Controlador para obtener todos los id de libros 
  * Envia un array con las ids */
 
 exports.obtenerIds = function (req, res) {
-    var ids = [];
-    for (i in libros) {
-        ids.push(i);
-    }
-    res.json(ids); 
+    dbo.collection("libro").find({}, { projection: { _id: 1 } }).toArray()
+        .then((dbres) => { res.json(dbres.map((obj) => obj._id)) }) // mapea resultado a array solo de _ids
+        .catch((err) => {
+            console.log(err);
+            res.status(400).end()
+        })
 }
 
 /** Controlador para guardar un libro. Envia el libro guardado, añadiendo su id */
-exports.guardarLibro = function(req, res) {
-    let libro = req.body;
-    let id = libros.length;
-    libros.push(libro);
-    res.json({
-        id,
-        ...libro  // el operador spread añade los atributos del objeto libro a este objeto
-    });
+exports.guardarLibro = function (req, res) {
+    let item = req.body;
+    dbo.collection("libro").insertOne(item)
+        .then((dbres) => { res.json(dbres.ops[0]) })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).end()
+        })
 };
 
 /** Controlador para modificar un libro. No devuelve cuerpo */
-exports.modificarLibro = function(req, res) {
-    let libro = req.body;
-    let id = req.params.id;
-    delete libro.id; // borrar el id del objeto, si es que nos lo han enviado
-    libros[id] = libro;
-    res.end();
+exports.modificarLibro = function (req, res) {
+    var myquery = { _id: ObjectId(req.params.id) };
+    var newvalues = { $set: req.body };
+    dbo.collection("libro").updateOne(myquery, newvalues)
+        .then((dbres) => res.end())
+        .catch((err) => {
+            console.log(err);
+            res.status(400).end()
+        })
 };
 
 /** Controlador para borrar. No devuelve cuerpo */
-exports.borrarLibro = function(req, res) {
-    let id = req.params.id;
-    libros[id]=null;
-    res.end();
+exports.borrarLibro = function (req, res) {
+    console.log("por hacer");
 };
