@@ -1,57 +1,68 @@
-Vue.component('libro',
+
+Vue.component('alumno',
     {
-        data: function() {
+        data: function () {
             return {
-                titulo: "El titulo",
-                autor: "El autor",
-                leido: false,
+                id: this.datos._id,
+                anima: false, // indica si se anima el badge
+                ...this.datos,
             }
         },
         props: {
-            _id: String,
-        },
-        created: function() {
-            console.log("fetching libro /libro/"+this._id)
-            fetch("/libro/"+this._id)
-                .then((res)=>res.json())
-                .then((res)=>{
-                    this.titulo=res.titulo;
-                    this.autor=res.autor;
-                    this.leido=res.leido;
-                })
+            datos: Object
         },
         methods: {
-            update: function() {
-                let libro = {
-                    titulo: this.titulo,
-                    autor: this.autor,
-                    leido: this.leido
-                };
-                fetch("/libro/"+this._id, {
+            more() { // añadir una tortita
+                this.tortitas++;
+                this.anima = true;
+                this.update("tortitas");
+                setTimeout(() => { this.anima = false }, 2000);
+            },
+            update(field) { // enviar un update al api
+                let alumno = {};
+                switch (field) {
+                    case 'tortitas':
+                        alumno.tortitas = this.tortitas;
+                        break;
+                    case 'vegan':
+                        alumno.vegan = this.vegan;
+                        break;
+                    case 'glutenfree':
+                        alumno.glutenfree = this.glutenfree;
+                        break;
+                }
+                fetch("/alumno/" + this.id, {
                     "method": "PUT",
                     "headers": {
-                      "content-type": "application/json"
+                        "content-type": "application/json"
                     },
-                    "body": JSON.stringify(libro),
-                  })
-                  .then(response => {
-                    console.log("Updated "+ this._id);
-                  })
+                    "body": JSON.stringify(alumno),
+                })
+                    .then(response => {
+                        if (response.status >= 400) {
+                            this.$emit("error", `Update: no status 200`)
+                        }
+                        console.log(`PUT de ${this.nombre} (${this.id})`);
+                    })
+                    .catch(err => { this.$emit("error", `Update: ${err}`) })
 
             }
         },
         template:
-`<div class="card mb-1">
-  <div class="card-header">
-    {{titulo}}
-  </div>
-  <div class="card-body" :class="{'bg-warning':leido}">
-    <h5 class="card-title">{{autor}}</h5>
-    <p class="card-text">id: {{_id}}</p>
+            `
+<div class="border m-2 p-2 rounded">            
+<h3>
+   {{this.nombre}}
+   <span class="badge badge-primary" :class="{bounceIn:this.anima}" >{{this.tortitas}} </span> 
+   <button class="btn btn-secondary" v-on:click="more()">Más</button>
+</h3>
     <label>
-        <input type="checkbox" v-model="leido" @change="update"> Leído;
+        <input type="checkbox" v-model="vegan" @change="update('vegan')"> vegan
     </label>
-  </div>
+    <label class="ml-3">
+        <input type="checkbox" v-model="glutenfree" @change="update('glutenfree')"> gluten free
+    </label>
+
 </div>`
     }
 )
@@ -59,14 +70,69 @@ Vue.component('libro',
 var vue = new Vue({
     el: "#app",
     data: {
-        idsLibros: [],
+        alumnos: [],
+        nuevonombre: "", // el nombre de un alumno nuevo
+        error: "", // el mensaje de error
     },
-    created: function () {
-        console.log("Fetching todos los libros");
-        fetch("/libro/all")
-            .then((res) => { return res.json(); })
-            .then((res) => { this.idsLibros = res });
+    created() {
+        this.cargarTodo();
+    },
+    computed: {
+        isNameInvalid() {
+            return (_.findIndex(this.alumnos, { nombre: this.nuevonombre }) >= 0);
+        }
+    },
+    methods: {
+        annadirNombre() {
+            if (this.isNameInvalid || !this.nuevonombre) {
+                this.setError("Nombre no válido.");
+                return;
+            }
+            console.log("POST de alumno nuevo");
+            fetch("/alumno", {
+                "method": "POST",
+                "headers": {
+                    "content-type": "application/json"
+                },
+                "body": JSON.stringify({
+                    "nombre": this.nuevonombre
+                })
+            })
+                .then(response => response.json())
+                .then(response => { this.alumnos.push(response); this.alumnos = _.sortBy(this.alumnos, "nombre") }
+                )
+                .catch(err => { this.setError(`Añadiendo alumno: ${err}`) });
+            this.nuevonombre = ""
+        },
+        borrarTodo() {
+            console.log("DELETE de todo");
+            fetch("/alumno",
+                { "method": "DELETE" }
+            )
+                .then(response => {
+                    if (response.status >= 400) {
+                        this.setError("Status 400 en borrar todo");
+                        return;
+                    }
+                    this.cargarTodo();
+                })
+                .catch(err => { this.setError(`borrando todos: ${err}`) });
 
-    },
+        },
+        cargarTodo() {
+            console.log("GET de todos los alumnos");
+            fetch("/alumno")
+                .then((res) => { return res.json(); })
+                .then((res) => { this.alumnos = _.sortBy(res, "nombre") })
+                .catch((err) => { this.setError(`Fetch de todos los alumnos: ${err}`) })
+
+        },
+        setError(err) {
+            this.error = err;
+            setTimeout(() => {
+                this.error = "";
+            }, 5000);
+        }
+    }
 });
 

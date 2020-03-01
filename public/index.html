@@ -1,17 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <title>Tortitas!</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!--link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/vue2-animate/dist/vue2-animate.css" />
     <script defer src="main.js"></script>
 </head>
+
 <body class="container">
-    <h1>SPA Libros reactiva con vue</h1>
     <div id="app">
-            <libro v-for="idLibro of idsLibros" :_id="idLibro" :key="idLibro"></libro>
+        <div class="row">
+            <div class="col-3">
+                <img src="assets/pancakes.png" class="img-fluid" alt="tortitas">
+            </div>
+            <h1 class="col-sm-5">¡Tortitas!</h1>
+            <div class="col-2">
+                <img src="assets/vegan.png" class="img-fluid">
+            </div>
+            <div class="col-2">
+                <img src="assets/glutenfree.png" class="img-fluid">
+            </div>
+        </div>
+
+        <div class="alert alert-danger bounceIn" role="alert" v-if="error!=''">
+            {{error}}
+        </div>
+
+        <transition-group name="fadeRight" tag="div" class="list-group">
+            <alumno v-for="alumno of alumnos" :key="alumno._id" :datos="alumno" v-on:error="setError"
+                class="list-group-item">
+            </alumno>
+        </transition-group>
+        <!--p v-for="alumno of alumnos">{{alumno.nombre}}</p-->
+        <p>
+            <label for="nuevonombre">Añadir nombre:</label>
+            <input id="nuevonombre" type="text" v-model="nuevonombre" v-on:keyup.enter="annadirNombre"
+                class="form-control" :class="{'is-invalid':isNameInvalid}">
+            <hr>
+            <button class="btn btn-danger" :disabled="this.alumnos.length==0" v-on:click="borrarTodo">Borrar
+                Todo</button>
+        </p>
+
     </div>
 </body>
+
 </html>

@@ -1,7 +1,7 @@
 {
-  "name": "applibros",
-  "version": "1.0.0",
-  "description": "Un proyecto de prueba con servicios y el stack MEVN",
+  "name": "apptortitas",
+  "version": "0.1.0",
+  "description": "Un proyecto de examen con servicios y el stack MEVN",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,8 +17,5 @@
   "dependencies": {
     "express": "^4.17.1",
     "mongodb": "^3.5.3"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.2"
   }
 }

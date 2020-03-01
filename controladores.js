@@ -11,8 +11,8 @@ var dbo;
 client.connect() // devuelve una promesa
     .then(       // que relleno con una función si la promesa se satisface
         () => {
-            dbo = client.db("apilibros");
-            console.log("Conectado a la bd apilibros");
+            dbo = client.db("apitortitas");
+            console.log("Conectado a la bd apitortitas");
         }
     )
     .catch(      // y otra si no se ha podido satisfacer
@@ -23,30 +23,45 @@ client.connect() // devuelve una promesa
     )
 
 
-/** Controlador para obtener un libro */
-exports.obtenerLibro = function (req, res) {
+/** Controlador para obtener un alumno */
+exports.obtenerAlumno = function (req, res) {
     let id = req.params.id;
-    dbo.collection("libro").findOne({ _id: ObjectId(req.params.id) })
+    dbo.collection("alumno").findOne({ _id: ObjectId(req.params.id) })
         .then((dbres) => { res.json(dbres); })
         .catch((err) => { res.status(400).end(); })
 }
 
-/** Controlador para obtener todos los id de libros 
+/** Controlador para obtener todos los id de alumnos
  * Envia un array con las ids */
 
-exports.obtenerIds = function (req, res) {
-    dbo.collection("libro").find({}, { projection: { _id: 1 } }).toArray()
-        .then((dbres) => { res.json(dbres.map((obj) => obj._id)) }) // mapea resultado a array solo de _ids
+exports.obtenerTodos = function (req, res) {
+    dbo.collection("alumno").find().toArray()
+        .then((dbres) => { res.json(dbres) }) // mapea resultado a array solo de _ids
         .catch((err) => {
             console.log(err);
             res.status(400).end()
         })
 }
 
-/** Controlador para guardar un libro. Envia el libro guardado, añadiendo su id */
-exports.guardarLibro = function (req, res) {
-    let item = req.body;
-    dbo.collection("libro").insertOne(item)
+exports.borrarTodo = function (req, res) {
+    dbo.collection("alumno").drop()
+        .then((dbres) => { res.end() }) 
+        .catch((err) => {
+            console.log(err);
+            res.status(400).end()
+        })
+}
+
+
+/** Controlador para guardar un alumno. Envia el alumno guardado, añadiendo su id */
+exports.guardarAlumno = function (req, res) {
+    let item = {
+        nombre: req.body.nombre,
+        tortitas: 1,
+        vegan: false,
+        glutenfree: false
+    }
+    dbo.collection("alumno").insertOne(item)
         .then((dbres) => { res.json(dbres.ops[0]) })
         .catch((err) => {
             console.log(err);
@@ -54,11 +69,11 @@ exports.guardarLibro = function (req, res) {
         })
 };
 
-/** Controlador para modificar un libro. No devuelve cuerpo */
-exports.modificarLibro = function (req, res) {
+/** Controlador para modificar un alumno. No devuelve cuerpo */
+exports.modificarAlumno = function (req, res) {
     var myquery = { _id: ObjectId(req.params.id) };
     var newvalues = { $set: req.body };
-    dbo.collection("libro").updateOne(myquery, newvalues)
+    dbo.collection("alumno").updateOne(myquery, newvalues)
         .then((dbres) => res.end())
         .catch((err) => {
             console.log(err);
@@ -66,7 +81,4 @@ exports.modificarLibro = function (req, res) {
         })
 };
 
-/** Controlador para borrar. No devuelve cuerpo */
-exports.borrarLibro = function (req, res) {
-    console.log("por hacer");
-};
+
